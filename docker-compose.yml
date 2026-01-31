@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: ./Technothon_backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Technothon_backend:/app
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - ./Technothon_backend/.env
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./Technothon_frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Technothon_frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm run dev
+    restart: always
+    depends_on:
+      - backend
+
+  db:
+    image: mysql:8
+    container_name: technothon-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: qwerty
+      MYSQL_DATABASE: TechnothonDB
+      MYSQL_USER: technothon
+      MYSQL_PASSWORD: 12345
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
