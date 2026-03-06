@@ -1,21 +1,27 @@
 // Footer.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { FaInstagram, FaLinkedin, FaYoutube } from "react-icons/fa";
+import { fetchSiteSettings } from "@/pages/components/SiteSettingsSection";
 
 export default function Footer() {
   const footerRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [siteSettings, setSiteSettings] = useState({ sponsors: true, inspiration: true, joinUs: true });
+
+  // Keep in sync when admin toggles from another tab / the dashboard
+  useEffect(() => {
+  fetchSiteSettings().then(setSiteSettings);
+}, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting); // toggles true/false
+        setIsVisible(entry.isIntersecting);
       },
       { threshold: 0.3 }
     );
 
     if (footerRef.current) observer.observe(footerRef.current);
-
     return () => observer.disconnect();
   }, []);
 
@@ -67,9 +73,10 @@ export default function Footer() {
 
           {/* Right Section - Socials + Extra Note */}
           <div className="flex flex-col items-center gap-4">
-            <div className="flex md:flex-row flex-col relative items-center justify-center gap-6">
-              {/* Vivarta logo */}
-              <a
+            {/* ✅ Join Us — conditionally rendered */}
+            {siteSettings.joinUs && (
+              <div className="flex md:flex-row flex-col relative items-center justify-center gap-6">
+                <a
                   href="/careers"
                   className="
                     px-5 py-2 rounded-xl
@@ -77,7 +84,6 @@ export default function Footer() {
                     text-white/90 backdrop-blur-md
                     bg-white/5 border border-white/10
                     shadow-[0_0_15px_rgba(139,92,246,0.25)]
-
                     transition-all duration-300 ease-out
                     hover:bg-violet-500/20
                     hover:text-white
@@ -86,8 +92,10 @@ export default function Footer() {
                   "
                 >
                   Join Us
-              </a>
-            </div>
+                </a>
+              </div>
+            )}
+
             <div className="flex gap-6">
               <a
                 href="https://www.youtube.com/@Technothon-TIU"

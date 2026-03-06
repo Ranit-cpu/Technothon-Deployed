@@ -39,17 +39,19 @@ export default function TeamRegistration() {
   const eventId = searchParams.get("eventId");
 
   const availableRoles = [
-    "Frontend Developer",
-    "Backend Developer",
-    "Full Stack Developer",
-    "UI/UX Designer",
-    "Data Scientist",
-    "Machine Learning Engineer",
-    "DevOps Engineer",
-    "Mobile Developer",
-    "Database Administrator",
-    "Quality Assurance Engineer",
-  ];
+  "Embedded Systems Engineer",
+  "IoT Hardware Engineer",
+  "IoT Firmware Developer",
+  "Sensor & Actuator Specialist",
+  "Robotics Engineer",
+  "Edge Computing Engineer",
+  "IoT Network & Protocol Engineer",
+  "Cloud IoT Engineer",
+  "Industrial IoT (IIoT) Engineer",
+  "AIoT Engineer",
+  "IoT Security Engineer",
+  "Smart Systems Developer",
+];
 
   // ---------------------------------------------------------
   // FETCH CURRENT AUTHENTICATED USER

@@ -140,5 +140,11 @@ class ForgetPasswordRequest(BaseModel):
 
 class DomainSelect(BaseModel):
     domain_id: str
+
 class UpdateLiveStatusRequest(BaseModel):
     is_live: bool
+
+class SiteSettingsSchema(BaseModel):
+    sponsors: bool
+    inspiration: bool
+    joinUs: bool

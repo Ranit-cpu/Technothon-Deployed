@@ -11,6 +11,7 @@ import {
   FileText,
   GraduationCap,
   Menu,
+  Settings2,
 } from "lucide-react";
 
 import EventsSection from "./components/EventsSection";
@@ -23,6 +24,7 @@ import AddStudent from "./components/AddStudent";
 import Sidebar from "./components/Sidebar";
 import ParticipantsSection from "./components/ParticipantsSection";
 import TeamsSection from "./components/Teamssection";
+import SiteSettingsSection from "./components/SiteSettingsSection";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export default function Dashboard() {
         const profile = await adminApi.checkSession();
         setAdmin({
           ...profile,
-          name: profile.name.split(" ")[0]
+          name: profile.name.split(" ")[0],
         });
         setCheckingAuth(false);
       } catch {
@@ -125,8 +127,8 @@ export default function Dashboard() {
           events = data.data;
         }
 
-        const liveEvent = events.find(event =>
-          event.is_live === 1 || event.is_live === true
+        const liveEvent = events.find(
+          (event) => event.is_live === 1 || event.is_live === true
         );
 
         if (liveEvent) {
@@ -231,8 +233,9 @@ export default function Dashboard() {
             {activeSection === "events" && "Events"}
             {activeSection === "hiring" && "Hiring"}
             {activeSection === "add-member" && "Add Member"}
+            {activeSection === "site-settings" && "Site Settings"}
           </h1>
-          <div className="w-10"></div> {/* Spacer for centering */}
+          <div className="w-10" /> {/* Spacer for centering */}
         </div>
 
         {/* SCROLLABLE CONTENT */}
@@ -252,7 +255,11 @@ export default function Dashboard() {
 
               {/* STATS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <Stat title="Current Event" value={currentEvent} icon={Calendar} />
+                <Stat
+                  title="Current Event"
+                  value={currentEvent}
+                  icon={Calendar}
+                />
                 <Stat
                   title="Total Participation"
                   value={applicationsCount}
@@ -299,7 +306,9 @@ export default function Dashboard() {
                           <th className="text-left py-3 px-2">Team</th>
                           <th className="text-center py-3 px-2">Lead Name</th>
                           <th className="text-center py-3 px-2">Payment</th>
-                          <th className="text-center py-3 px-2">Status / Action</th>
+                          <th className="text-center py-3 px-2">
+                            Status / Action
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -325,6 +334,7 @@ export default function Dashboard() {
           {activeSection === "events" && <EventsSection />}
           {activeSection === "hiring" && <HiringSection />}
           {activeSection === "add-member" && <AddStudent />}
+          {activeSection === "site-settings" && <SiteSettingsSection />}
         </div>
       </main>
     </div>
@@ -335,11 +345,18 @@ export default function Dashboard() {
 
 const Stat = ({ title, value, sub, isPositive, icon: Icon }) => (
   <div className="bg-[#1a1025] p-4 md:p-6 rounded-2xl border border-white/5 relative">
-    <Icon className="opacity-20 absolute right-4 md:right-6 top-4 md:top-6" size={32} />
+    <Icon
+      className="opacity-20 absolute right-4 md:right-6 top-4 md:top-6"
+      size={32}
+    />
     <p className="text-xs md:text-sm opacity-60">{title}</p>
     <h3 className="text-2xl md:text-3xl font-bold">{value}</h3>
     {sub && (
-      <p className={`text-xs mt-1 ${isPositive ? "text-green-400" : "opacity-50"}`}>
+      <p
+        className={`text-xs mt-1 ${
+          isPositive ? "text-green-400" : "opacity-50"
+        }`}
+      >
         {sub}
       </p>
     )}

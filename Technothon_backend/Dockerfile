@@ -2,16 +2,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y gcc libmariadb-dev && rm -rf /var/lib/apt/lists/*
-
-COPY req.txt req.txt
-
-RUN pip3 install -r req.txt
-
-FROM python:3.11-slim
-
-WORKDIR /app
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y gcc libmariadb-dev && rm -rf /var/lib/apt/lists/*
 

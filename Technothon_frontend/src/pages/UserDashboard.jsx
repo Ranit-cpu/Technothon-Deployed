@@ -25,7 +25,7 @@ const useRevealOnScroll = (ref, threshold = 0.3) => {
           observer.unobserve(entry.target);
         }
       },
-      { threshold }
+      { threshold },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -51,6 +51,7 @@ const UserDashboard = () => {
   const statsRef = useRef(null);
   const achievementsRef = useRef(null);
   const certificatesRef = useRef(null);
+  const qrRef = useRef(null);
 
   // Animations
   const isProfileVisible = useRevealOnScroll(profileRef);
@@ -59,22 +60,22 @@ const UserDashboard = () => {
   const isCertificatesVisible = useRevealOnScroll(certificatesRef);
 
   useEffect(() => {
-      const fetchCoupon = async () => {
-        try {
-          const couponRes = await axios.get("http://localhost:8000/coupon", {
-            withCredentials: true,
-          });
-          setCoupon(couponRes.data);
-          setCouponError(null);  // reset error when coupon found
-        } catch (err) {
-          console.warn("No active coupon:", err?.response?.data?.detail);
-          setCoupon(null);
-          setCouponError(err?.response?.data?.detail || "No active coupon.");
-        }
-      };
+    const fetchCoupon = async () => {
+      try {
+        const couponRes = await axios.get("http://localhost:8000/coupon", {
+          withCredentials: true,
+        });
+        setCoupon(couponRes.data);
+        setCouponError(null); // reset error when coupon found
+      } catch (err) {
+        console.warn("No active coupon:", err?.response?.data?.detail);
+        setCoupon(null);
+        setCouponError(err?.response?.data?.detail || "No active coupon.");
+      }
+    };
 
-      fetchCoupon();
-    }, []);
+    fetchCoupon();
+  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -106,7 +107,11 @@ const UserDashboard = () => {
             withCredentials: true,
           });
 
-          const formatted = JSON.stringify(teamsRes.data.participation || [], null, 2);
+          const formatted = JSON.stringify(
+            teamsRes.data.participation || [],
+            null,
+            2,
+          );
 
           console.log("📌 Past Teams JSON:", formatted);
           setPastTeams(JSON.parse(formatted));
@@ -123,7 +128,10 @@ const UserDashboard = () => {
           const eventsRes = await axios.get("http://localhost:8000/events");
           setEvents(eventsRes.data || []);
         } catch (eventErr) {
-          console.warn("Failed to load events:", eventErr?.response?.data?.detail);
+          console.warn(
+            "Failed to load events:",
+            eventErr?.response?.data?.detail,
+          );
           setEvents([]);
         }
       } catch (err) {
@@ -143,16 +151,16 @@ const UserDashboard = () => {
       return {
         message: "You are not part of any current team.",
         color: "text-gray-400",
-        badge: null
+        badge: null,
       };
     }
 
     // If currentTeam is just a string (backward compatibility)
-    if (typeof currentTeam === 'string') {
+    if (typeof currentTeam === "string") {
       return {
         message: `You're part of ${currentTeam}`,
         color: "text-purple-300",
-        badge: "✅ Approved"
+        badge: "✅ Approved",
       };
     }
 
@@ -161,15 +169,27 @@ const UserDashboard = () => {
       return {
         message: `Team: ${currentTeam.name}`,
         color: "text-red-400",
-        badge: "⏳ Approval Pending"
+        badge: "⏳ Approval Pending",
       };
     } else {
       return {
         message: `You're part of ${currentTeam.name}`,
         color: "text-purple-300",
-        badge: "✅ Approved"
+        badge: "✅ Approved",
       };
     }
+  };
+  const downloadQRCode = () => {
+    if (!qrRef.current) return;
+
+    const canvas = qrRef.current.querySelector("canvas");
+    if (!canvas) return;
+
+    const url = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `food-coupon-${user?.id || "qr"}.png`;
+    link.click();
   };
 
   const teamDisplay = getTeamStatusDisplay();
@@ -209,9 +229,7 @@ const UserDashboard = () => {
               <p className="text-gray-300 text-sm">
                 {user?.email || "Email not available"}
               </p>
-              <p className="text-gray-300 text-sm">
-                User-ID:{user?.id}
-              </p>
+              <p className="text-gray-300 text-sm">User-ID:{user?.id}</p>
             </div>
           </div>
           <button
@@ -249,7 +267,10 @@ const UserDashboard = () => {
                     key={e.id}
                     className="border-b border-white/10 pb-2 last:border-none"
                   >
-                    <p className="font-medium text-purple-300">{e.name}<span className="ml-80">LIVE🟢</span></p>
+                    <p className="font-medium text-purple-300">
+                      {e.name}
+                      <span className="ml-80">LIVE🟢</span>
+                    </p>
                     {e.description && (
                       <p className="text-xs text-gray-400">{e.description}</p>
                     )}
@@ -353,45 +374,57 @@ const UserDashboard = () => {
         {/* Bottom Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
           <Card className="h-full flex flex-col items-center justify-center">
-              <h4 className="text-lg font-semibold text-purple-300 mb-3">
-                Food Coupon 🍔
-              </h4>
-              {coupon ? (
+            <h4 className="text-lg font-semibold text-purple-300 mb-3">
+              Food Coupon 🍔
+            </h4>
+
+            {coupon ? (
+              <div ref={qrRef} className="flex flex-col items-center gap-4">
                 <QRCodeCanvas
-                  value={JSON.stringify(coupon)}   // QR contains coupon info
+                  value={JSON.stringify(coupon)}
                   size={160}
                   bgColor="transparent"
                   fgColor="#ffffff"
                 />
-              ) : (
-                <p className="text-gray-400 text-sm">
-                  {couponError || "No active coupon."}
-                </p>
-              )}
-        </Card>
+
+                <button
+                  onClick={downloadQRCode}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full text-xs font-medium hover:opacity-90"
+                >
+                  Download QR Code
+                </button>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">
+                {couponError || "No active coupon."}
+              </p>
+            )}
+          </Card>
 
           {/* ✅ Past Teams */}
           <Card className="h-full flex flex-col">
-              <h4 className="text-lg font-semibold text-purple-300 mb-3">
-                Past Teams 👥
-              </h4>
-              {pastTeams.length ? (
-                <ul className="space-y-3 text-gray-300 text-sm overflow-y-auto">
-                  {pastTeams.map((team, idx) => (
-                    <li key={idx} className="border-b border-white/10 pb-2">
-                      <p className="font-medium text-purple-300">{team.team_name}</p>
-                      <p className="text-xs text-gray-400">{team.event}</p>
-                      {team.members?.length > 0 && (
-                        <p className="text-xs text-gray-400">
-                          Members: {team.members.join(", ")}
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400 text-sm">No past teams found.</p>
-              )}
+            <h4 className="text-lg font-semibold text-purple-300 mb-3">
+              Past Teams 👥
+            </h4>
+            {pastTeams.length ? (
+              <ul className="space-y-3 text-gray-300 text-sm overflow-y-auto">
+                {pastTeams.map((team, idx) => (
+                  <li key={idx} className="border-b border-white/10 pb-2">
+                    <p className="font-medium text-purple-300">
+                      {team.team_name}
+                    </p>
+                    <p className="text-xs text-gray-400">{team.event}</p>
+                    {team.members?.length > 0 && (
+                      <p className="text-xs text-gray-400">
+                        Members: {team.members.join(", ")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-400 text-sm">No past teams found.</p>
+            )}
           </Card>
 
           {/* ✅ Current Team with Status */}
@@ -405,18 +438,21 @@ const UserDashboard = () => {
                   {teamDisplay.message}
                 </p>
                 {teamDisplay.badge && (
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                    teamDisplay.badge.includes('Pending')
-                      ? 'bg-yellow-500/20 text-red-300 border border-yellow-500/30'
-                      : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                  }`}>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                      teamDisplay.badge.includes("Pending")
+                        ? "bg-yellow-500/20 text-red-300 border border-yellow-500/30"
+                        : "bg-green-500/20 text-green-300 border border-green-500/30"
+                    }`}
+                  >
                     {teamDisplay.badge}
                   </span>
                 )}
               </div>
               {currentTeam && currentTeam.status === 0 && (
                 <p className="text-xs text-gray-400 mt-3">
-                  Your team registration is being reviewed by the admin. You'll be notified once it's approved.
+                  Your team registration is being reviewed by the admin. You'll
+                  be notified once it's approved.
                 </p>
               )}
             </div>

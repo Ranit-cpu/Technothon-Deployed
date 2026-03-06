@@ -11,7 +11,7 @@ import HeroSection from "@/components/ui/HeroSection";
 import TestimonialCarousel from "@/components/TestimonialCaraousel";
 import axios from "axios";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-//import cursorDrone from "./components/ui/cursorDrone";
+import { fetchSiteSettings } from "@/pages/components/SiteSettingsSection";
 
 import {
   leaders,
@@ -49,6 +49,8 @@ const Home = () => {
   const [visibleSections, setVisibleSections] = useState({});
   const [galleryItems, setGalleryItems] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // ✅ Site settings — reads from localStorage and updates live
+  const [siteSettings, setSiteSettings] = useState({ sponsors: true, inspiration: true, joinUs: true });
 
   const introRef = useRef(null);
   const eventsRef = useRef(null);
@@ -76,6 +78,11 @@ const Home = () => {
     [introRef, eventsRef, projectsRef, galleryRef, leaderRef, testimonialsRef],
     setVisibleSections
   );
+
+  // ✅ Sync site settings when admin toggles from another tab
+  useEffect(() => {
+  fetchSiteSettings().then(setSiteSettings);
+}, []);
 
   // ✅ Fetch gallery images from backend
   useEffect(() => {
@@ -120,34 +127,26 @@ const Home = () => {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <HeroSection isReady={showHero} />
 
-          {/* Sponsors */}
-          <div className="py-8 border-y border-white/10" id="sponsors">
-            <Marquee pauseOnHover speed={50}>
-              {sponsors.map((s) => (
-                <div
-                  key={s.id}
-                  className="mx-12 flex items-center justify-center"
-                >
-                  <img
-                    src={s.image}
-                    alt={s.name}
-                    loading="lazy"
-                    className="h-12 w-auto object-contain transition-all duration-300 hover:scale-110"
-                  />
-                </div>
-              ))}
-            </Marquee>
-          </div>
-{/*           <div className="w-full flex justify-center py-8"> */}
-{/*               <button */}
-{/*                 onClick={() => (window.location.href = "/careers")} */}
-{/*                 className="px-8 py-3 text-lg font-semibold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-700 */}
-{/*                 rounded-full shadow-[0_0_20px_rgba(167,48,255,0.6)] hover:shadow-[0_0_35px_rgba(200,70,255,0.8)] */}
-{/*                 transition-all duration-300 tracking-wide"> */}
-{/*                 🚀 Join Us — We're Hiring! */}
-{/*               </button> */}
-{/*           </div> */}
-
+          {/* ✅ Sponsors — conditionally rendered */}
+          {siteSettings.sponsors && (
+            <div className="py-8 border-y border-white/10" id="sponsors">
+              <Marquee pauseOnHover speed={50}>
+                {sponsors.map((s) => (
+                  <div
+                    key={s.id}
+                    className="mx-12 flex items-center justify-center"
+                  >
+                    <img
+                      src={s.image}
+                      alt={s.name}
+                      loading="lazy"
+                      className="h-12 w-auto object-contain transition-all duration-300 hover:scale-110"
+                    />
+                  </div>
+                ))}
+              </Marquee>
+            </div>
+          )}
 
           {/* Intro */}
           <Section id="intro" ref={introRef} visible={visibleSections.intro}>
@@ -249,8 +248,14 @@ const Home = () => {
                 {/* Main Image Container */}
                 <div className="relative w-full h-[500px] bg-gradient-to-br from-violet-900/20 via-purple-900/20 to-pink-900/20 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                   <img
-                    src={galleryItems[currentImageIndex]?.image || galleryItems[currentImageIndex]?.url}
-                    alt={galleryItems[currentImageIndex]?.title || `Gallery image ${currentImageIndex + 1}`}
+                    src={
+                      galleryItems[currentImageIndex]?.image ||
+                      galleryItems[currentImageIndex]?.url
+                    }
+                    alt={
+                      galleryItems[currentImageIndex]?.title ||
+                      `Gallery image ${currentImageIndex + 1}`
+                    }
                     className="w-full h-full object-contain transition-all duration-500"
                     onError={(e) => {
                       e.target.src = "/images/placeholder.jpg";
@@ -330,27 +335,29 @@ const Home = () => {
             )}
           </Section>
 
-          {/* Leaders */}
-{/*           <Section */}
-{/*             id="leader" */}
-{/*             ref={leaderRef} */}
-{/*             visible={visibleSections.leader} */}
-{/*             className="py-12" */}
-{/*           > */}
-{/*             <div className="text-center mb-12"> */}
-{/*               <h2 className="text-5xl font-bold bg-gradient-to-r from-gray-200 via-gray-500 to-gray-300 bg-clip-text text-transparent inline-block"> */}
-{/*                 Our Inspiration */}
-{/*               </h2> */}
-{/*               <p className="text-white/70 tracking-wider mt-2 text-lg"> */}
-{/*                 Meet the visionary leaders of Techno India University */}
-{/*               </p> */}
-{/*             </div> */}
-{/*             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 px-4 sm:px-8"> */}
-{/*               {leaders.map((leader) => ( */}
-{/*                 <HomeCard key={leader.id} item={leader} variant="leader" /> */}
-{/*               ))} */}
-{/*             </div> */}
-{/*           </Section> */}
+          {/* ✅ Our Inspiration — conditionally rendered */}
+          {siteSettings.inspiration && (
+            <Section
+              id="leader"
+              ref={leaderRef}
+              visible={visibleSections.leader}
+              className="py-12"
+            >
+              <div className="text-center mb-12">
+                <h2 className="text-5xl font-bold bg-gradient-to-r from-gray-200 via-gray-500 to-gray-300 bg-clip-text text-transparent inline-block">
+                  Our Inspiration
+                </h2>
+                <p className="text-white/70 tracking-wider mt-2 text-lg">
+                  Meet the visionary leaders of Techno India University
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 px-4 sm:px-8">
+                {leaders.map((leader) => (
+                  <HomeCard key={leader.id} item={leader} variant="leader" />
+                ))}
+              </div>
+            </Section>
+          )}
 
           {/* Testimonials */}
           <Section

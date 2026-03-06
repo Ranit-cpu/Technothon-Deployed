@@ -16,6 +16,7 @@ from app.routers.food import food_coupon
 from app.routers.participants import participant_data
 from app.routers.domains import domains
 from app.routers.jobs import jobs
+from app.routers.visibility.site_settings import router as settings_router
 
 import os
 
@@ -64,6 +65,7 @@ app.include_router(IE_2024.router, tags=["IE 2024 Data"])
 app.include_router(AU_2024.router, tags=["AU 2024 Data"])
 app.include_router(IE_2025.router, tags=["IE 2025 Data"])
 app.include_router(AU_2025.router, tags=["AU 2025 Data"])
+app.include_router(settings_router, tags=["Site Settings"])
 
 # ✅ Static + Uploads
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

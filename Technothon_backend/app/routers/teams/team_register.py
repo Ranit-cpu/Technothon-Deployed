@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func
+from sqlalchemy import desc
 from starlette.templating import Jinja2Templates
 from starlette.requests import Request
 from datetime import datetime
@@ -47,9 +48,19 @@ async def generate_team_id(event_id: str, db: AsyncSession) -> str:
 
 # Generate custom participant ID
 async def generate_participant_id(db: AsyncSession):
-    result = await db.execute(select(func.count(Participant.pid)))
-    count = result.scalar() or 0
-    return f"P{count + 1:03}"
+    result = await db.execute(
+        select(Participant.pid)
+        .order_by(desc(Participant.pid))
+        .limit(1)
+    )
+    last_participant = result.scalar_one_or_none()
+
+    if not last_participant:
+        return "P001"  # ✅ Start with P001 instead of P1
+
+    last_id = last_participant  # e.g. "P118"
+    number = int(last_id[1:])  # 118
+    return f"P{number + 1:03d}"# 118
 
 
 async def generate_food_coupon_id(db: AsyncSession):

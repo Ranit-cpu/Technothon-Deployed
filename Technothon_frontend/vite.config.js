@@ -13,6 +13,9 @@ export default defineConfig({
   },
   server: {
     host: true, // allow external access
-    
+    watch: {
+      usePolling: true,    // ← key fix for Linux servers
+      interval: 1000,
+    }
   },
 })

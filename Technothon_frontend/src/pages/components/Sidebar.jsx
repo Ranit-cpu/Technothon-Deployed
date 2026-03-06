@@ -8,7 +8,8 @@ import {
   X,
   UserPlus,
   UserCheck,
-  UsersRound
+  UsersRound,
+  Settings2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { adminApi } from "./adminApi";
@@ -43,9 +44,9 @@ const Sidebar = ({
     if (adminProp) {
       setAdmin(adminProp);
     } else {
-      adminApi.getProfile()
+      adminApi
+        .getProfile()
         .then((response) => {
-          // Handle the response structure from your API
           setAdmin(response?.admin || response);
         })
         .catch(() => {
@@ -62,11 +63,15 @@ const Sidebar = ({
       navigate("/admin-login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
-      // Force navigation even if API fails
       navigate("/admin-login", { replace: true });
     } finally {
       setLoggingOut(false);
     }
+  };
+
+  const nav = (section) => {
+    setActiveSection(section);
+    setIsSidebarOpen(false);
   };
 
   return (
@@ -97,72 +102,59 @@ const Sidebar = ({
       </div>
 
       {/* NAVIGATION */}
-      <nav className="space-y-4">
+      <nav className="space-y-2">
         <NavItem
-          icon={<LayoutDashboard />}
+          icon={<LayoutDashboard size={20} />}
           label="Dashboard"
           active={activeSection === "dashboard"}
-          onClick={() => {
-            setActiveSection("dashboard");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("dashboard")}
         />
-
         <NavItem
-          icon={<Users />}
+          icon={<Users size={20} />}
           label="Attendance"
           active={activeSection === "attendance"}
-          onClick={() => {
-            setActiveSection("attendance");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("attendance")}
         />
         <NavItem
-          icon={<UserCheck />}
+          icon={<UserCheck size={20} />}
           label="Participants"
           active={activeSection === "participants"}
-          onClick={() => {
-            setActiveSection("participants");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("participants")}
         />
         <NavItem
-          icon={<UsersRound />}
+          icon={<UsersRound size={20} />}
           label="Teams"
           active={activeSection === "teams"}
-          onClick={() => {
-            setActiveSection("teams");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("teams")}
         />
         <NavItem
-          icon={<Calendar />}
+          icon={<Calendar size={20} />}
           label="Events"
           active={activeSection === "events"}
-          onClick={() => {
-            setActiveSection("events");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("events")}
         />
-
         <NavItem
-          icon={<Briefcase />}
+          icon={<Briefcase size={20} />}
           label="Hiring"
           active={activeSection === "hiring"}
-          onClick={() => {
-            setActiveSection("hiring");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("hiring")}
+        />
+
+        {/* Divider */}
+        <div className="border-t border-white/10 my-2" />
+
+        <NavItem
+          icon={<Settings2 size={20} />}
+          label="Site Settings"
+          active={activeSection === "site-settings"}
+          onClick={() => nav("site-settings")}
         />
       </nav>
 
       {/* ADD NEW MEMBER CTA */}
-      <div className="mt-8">
+      <div className="mt-6">
         <button
-          onClick={() => {
-            setActiveSection("add-member");
-            setIsSidebarOpen(false);
-          }}
+          onClick={() => nav("add-member")}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl
             bg-purple-600 text-white font-medium
             hover:bg-purple-700 transition
@@ -185,11 +177,10 @@ const Sidebar = ({
             border border-red-500/20 hover:border-red-500/40
             transition-all duration-300
             shadow-lg shadow-red-500/10
-            ${loggingOut ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
+            ${loggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
         >
-          <LogOut size={20} className={loggingOut ? 'animate-pulse' : ''} />
-          <span>{loggingOut ? 'Logging out...' : 'Logout'}</span>
+          <LogOut size={20} className={loggingOut ? "animate-pulse" : ""} />
+          <span>{loggingOut ? "Logging out..." : "Logout"}</span>
         </button>
 
         {/* ADMIN PROFILE */}
